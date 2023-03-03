@@ -16,8 +16,13 @@ export async function postUrl(req, res){
 }
 
 export async function urlById(req, res){
+    const {id} = req.params;
     try{
-        res.sendStatus(501);
+        const url = await db.query('SELECT id, "shortUrl", url FROM urls WHERE "shortUrl" = $1', [id]);
+
+        if(!url.rows[0]) return res.sendStatus(404);
+
+        res.status(200).send(url.rows[0]);
     }catch(error){
         console.log(error);
         res.sendStatus(500);
