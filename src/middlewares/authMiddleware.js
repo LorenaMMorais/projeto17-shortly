@@ -1,4 +1,4 @@
-import userSchema from '../schemas/userSchema,js';
+import userSchema from '../schemas/userSchema.js';
 import db from "../db.js";
 
 export async function validateUser(req, res, next){
