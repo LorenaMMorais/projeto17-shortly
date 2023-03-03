@@ -3,10 +3,11 @@ import db from '../db.js';
 
 export async function postUrl(req, res){
     const {url} = req.body;
+    const {id} = res.locals;
     const shortUrl = nanoid(8);
 
     try{
-        await db.query('INSERT INTO urls (url, "shortUrl") VALUES ($1, $2)', [url, shortUrl]);
+        await db.query('INSERT INTO urls (url, "shortUrl", "userId") VALUES ($1, $2, $3)', [url, shortUrl, id]);
     
         res.status(201).send({shortUrl});
     }catch(error){
@@ -16,11 +17,9 @@ export async function postUrl(req, res){
 }
 
 export async function urlById(req, res){
-    const {id} = req.params;
+    const {shortUrl} = req.params;
     try{
-        const url = await db.query('SELECT id, "shortUrl", url FROM urls WHERE "shortUrl" = $1', [id]);
-
-        if(!url.rows[0]) return res.sendStatus(404);
+        const url = await db.query('SELECT id, "shortUrl", url FROM urls WHERE "shortUrl" = $1', [shortUrl]);
 
         res.status(200).send(url.rows[0]);
     }catch(error){
@@ -31,14 +30,10 @@ export async function urlById(req, res){
 
 export async function openUrl(req, res){
     const {shortUrl} = req.params;
+    const {url} = res.locals;
+    const {url: link, visitCount} = url;
 
     try{
-        const url = await db.query('SELECT * FROM urls WHERE "shortUrl" = $1', [shortUrl]);
-
-        if (!url.rows[0]) return res.sendStatus(404);
-
-        const {url: link, visitCount} = url.rows[0];
-
         await db.query('UPDATE urls SET "visitCount" = $1 WHERE "shortUrl" = $2', [visitCount + 1, shortUrl]);
 
         res.redirect(link);
@@ -49,8 +44,14 @@ export async function openUrl(req, res){
 }
 
 export async function deleteUrl(req, res){
+    const {id, url} = res.locals;
+
     try{
-        res.sendStatus(501);
+        if (id !== url.userId) return res.sendStatus(401);
+
+        await db.query('DELETE FROM urls WHERE id = $1', [url.id]);
+
+        res.sendStatus(204);
     }catch(error){
         console.log(error);
         res.sendStatus(500);

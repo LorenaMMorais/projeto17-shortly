@@ -18,12 +18,40 @@ export async function validateUrl (req, res, next) {
     next();
 }
 
+export async function existUrl (req, res, next) {
+    const {shortUrl} = req.params;
+
+    try{
+        const req = await db.query('SELECT * FROM urls WHERE "shortUrl" = $1', [shortUrl]);
+
+        if(!req.rows[0]) return res.sendStatus(404);
+
+        const url = req.rows[0];
+
+        res.locals.url = url;
+    }catch(error){
+        console.log(error);
+        res.sendStatus(500);
+    }
+    next();
+}
+
 export async function validateHeader (req, res, next) {
     const {authorization} = req.headers;
-    const token = authorization ? authorization.replace('Bearer ', '') : '';
-    const isValid = await db.query('SELECT * FROM sessions WERE token = $1', [token]);
+    const token = authorization?.replace('Bearer ', '');
 
-    if(!authorization || !isValid.rows[0]) return res.sendStatus(401);
+    try{
+        const isValid = await db.query('SELECT * FROM sessions WERE token = $1', [token]);
+
+        if(!authorization || !isValid.rows[0]) return res.sendStatus(401);
+        
+        const id = isValid.rows[0].userId;
+        
+        res.locals.id = id;
+    }catch(error){
+        console.log(error);
+        res.sendStatus(500);
+    }
 
     next();
 }

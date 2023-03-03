@@ -12,6 +12,7 @@ CREATE TABLE urls(
     "shortUrl" TEXT NOT NULL,
     "visitCount" INTEGER DEFAULT 0,
     "createdAt" DATE DEFAULT NOW(),
+    "userId" INTEGER REFERENCES users("id")
 );
 
 CREATE TABLE sessions(
