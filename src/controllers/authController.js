@@ -1,7 +1,7 @@
 import {v4 as uuid} from 'uuid';
 import bcrypt from 'bcrypt';
 
-import connection from '..db.js';
+import db from '..db.js';
 
 export async function signUp(req, res){
     const {name, email} = req.body;

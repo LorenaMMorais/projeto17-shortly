@@ -1,6 +1,14 @@
+import { nanoid } from 'nanoid';
+import db from '../db.js';
+
 export async function postUrl(req, res){
+    const {url} = req.body;
+    const shortUrl = nanoid(8);
+
     try{
-        res.sendStatus(501);
+        await db.query('INSERT INTO urls (url, "shortUrl") VALUES ($1, $2)', [url, shortUrl]);
+    
+        res.status(201).send({shortUrl});
     }catch(error){
         console.log(error);
         res.sendStatus(500);
