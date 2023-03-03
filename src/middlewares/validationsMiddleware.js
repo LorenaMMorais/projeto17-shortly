@@ -20,7 +20,7 @@ export async function validateUrl (req, res, next) {
 
 export async function validateHeader (req, res, next) {
     const {authorization} = req.headers;
-    const token = authorization.replace('Bearer ', '');
+    const token = authorization ? authorization.replace('Bearer ', '') : '';
     const isValid = await db.query('SELECT * FROM sessions WERE token = $1', [token]);
 
     if(!authorization || !isValid.rows[0]) return res.sendStatus(401);
